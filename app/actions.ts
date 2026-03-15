@@ -25,35 +25,14 @@ export async function joinWaitlist(formData: FormData) {
   if (res.status === 409) return { error: "You're already on the list!" };
   if (!res.ok) return { error: "Something went wrong. Try again." };
 
-  // Send emails (best-effort — don't fail signup if email fails)
+  // Notify owner (best-effort — don't fail signup if email fails)
   try {
-    await Promise.all([
-      // Welcome email to the user
-      resend.emails.send({
-        from: "Thinkio <onboarding@resend.dev>",
-        to: email,
-        subject: "You're on the Thinkio waitlist!",
-        html: `
-          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#111">
-            <h2 style="margin:0 0 12px">You're in!</h2>
-            <p style="margin:0 0 16px;color:#444;line-height:1.6">
-              Thanks for joining the Thinkio waitlist. We'll email you the moment early access opens.
-            </p>
-            <p style="margin:0 0 16px;color:#444;line-height:1.6">
-              Thinkio turns your notes into quizzes, flashcards, and lessons — in seconds.
-            </p>
-            <p style="margin:0;color:#888;font-size:13px">— The Thinkio team</p>
-          </div>
-        `,
-      }),
-      // Notification to you
-      resend.emails.send({
-        from: "Thinkio <onboarding@resend.dev>",
-        to: "vukasindragutinovic8@gmail.com",
-        subject: `New waitlist signup: ${email}`,
-        html: `<p style="font-family:sans-serif;color:#111"><strong>${email}</strong> just joined the Thinkio waitlist.</p>`,
-      }),
-    ]);
+    await resend.emails.send({
+      from: "Thinkio <onboarding@resend.dev>",
+      to: "vukasindragutinovic8@gmail.com",
+      subject: `New waitlist signup: ${email}`,
+      html: `<p style="font-family:sans-serif;color:#111"><strong>${email}</strong> just joined the Thinkio waitlist.</p>`,
+    });
   } catch (_) {
     // Email failure doesn't block the signup
   }
