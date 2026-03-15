@@ -1,100 +1,154 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-
-function ElegantShape({
-  className,
-  delay = 0,
-  width = 400,
-  height = 100,
-  rotate = 0,
-  gradient = "from-white/[0.08]",
-}: {
-  className?: string;
-  delay?: number;
-  width?: number;
-  height?: number;
-  rotate?: number;
-  gradient?: string;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -150, rotate: rotate - 15 }}
-      animate={{ opacity: 1, y: 0, rotate: rotate }}
-      transition={{
-        duration: 2.4,
-        delay,
-        ease: [0.23, 0.86, 0.39, 0.96],
-        opacity: { duration: 1.2 },
-      }}
-      className={cn("absolute", className)}
-    >
-      <motion.div
-        animate={{ y: [0, 15, 0] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        style={{ width, height }}
-        className="relative"
-      >
-        <div
-          className={cn(
-            "absolute inset-0 rounded-full",
-            "bg-gradient-to-r to-transparent",
-            gradient,
-            "border border-white/[0.12]",
-            "shadow-[0_8px_32px_0_rgba(255,255,255,0.1)]",
-            "after:absolute after:inset-0 after:rounded-full",
-            "after:bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent_70%)]"
-          )}
-        />
-      </motion.div>
-    </motion.div>
-  );
-}
+import { useEffect, useRef } from "react";
 
 export function FloatingShapes() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    // ── Stars ────────────────────────────────────────────────────────────────
+    const STAR_COUNT = 160;
+    const stars = Array.from({ length: STAR_COUNT }, () => ({
+      x: Math.random(),
+      y: Math.random(),
+      r: Math.random() * 1.4 + 0.3,
+      opacity: Math.random() * 0.6 + 0.2,
+      twinkleSpeed: Math.random() * 0.015 + 0.005,
+      twinkleOffset: Math.random() * Math.PI * 2,
+    }));
+
+    // ── Shooting stars ────────────────────────────────────────────────────────
+    const SHOOT_COUNT = 4;
+    interface Shooter {
+      x: number; y: number;
+      vx: number; vy: number;
+      len: number;
+      opacity: number;
+      active: boolean;
+      cooldown: number;
+    }
+    const shooters: Shooter[] = Array.from({ length: SHOOT_COUNT }, (_, i) => ({
+      x: 0, y: 0, vx: 0, vy: 0, len: 0, opacity: 0,
+      active: false,
+      cooldown: i * 90 + Math.random() * 60,
+    }));
+
+    const spawnShooter = (s: Shooter) => {
+      s.x = Math.random() * 0.8 + 0.1;
+      s.y = Math.random() * 0.4;
+      const angle = (Math.random() * 20 + 25) * (Math.PI / 180);
+      const speed = Math.random() * 0.004 + 0.003;
+      s.vx = Math.cos(angle) * speed;
+      s.vy = Math.sin(angle) * speed;
+      s.len = Math.random() * 0.08 + 0.06;
+      s.opacity = 0;
+      s.active = true;
+    };
+
+    let t = 0;
+
+    const draw = () => {
+      const W = canvas.width;
+      const H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      t++;
+
+      // Draw stars
+      for (const s of stars) {
+        const tw = Math.sin(t * s.twinkleSpeed + s.twinkleOffset);
+        const alpha = s.opacity + tw * 0.2;
+        ctx.beginPath();
+        ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${Math.max(0, alpha)})`;
+        ctx.fill();
+      }
+
+      // Draw shooting stars
+      for (const s of shooters) {
+        if (!s.active) {
+          s.cooldown--;
+          if (s.cooldown <= 0) spawnShooter(s);
+          continue;
+        }
+
+        // Fade in / fade out
+        if (s.opacity < 1 && s.x < 0.4) s.opacity = Math.min(1, s.opacity + 0.06);
+        else if (s.x > 0.6) s.opacity = Math.max(0, s.opacity - 0.04);
+
+        if (s.opacity <= 0 && s.x > 0.6) {
+          s.active = false;
+          s.cooldown = Math.random() * 180 + 120;
+          continue;
+        }
+
+        const x1 = s.x * W;
+        const y1 = s.y * H;
+        const tailX = (s.x - s.vx * (s.len / Math.hypot(s.vx, s.vy))) * W;
+        const tailY = (s.y - s.vy * (s.len / Math.hypot(s.vx, s.vy))) * H;
+
+        const grad = ctx.createLinearGradient(tailX, tailY, x1, y1);
+        grad.addColorStop(0, `rgba(255,255,255,0)`);
+        grad.addColorStop(1, `rgba(255,255,255,${s.opacity * 0.9})`);
+
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(x1, y1);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Bright head
+        ctx.beginPath();
+        ctx.arc(x1, y1, 1.8, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${s.opacity})`;
+        ctx.fill();
+
+        s.x += s.vx;
+        s.y += s.vy;
+
+        if (s.x > 1.1 || s.y > 1.1) {
+          s.active = false;
+          s.cooldown = Math.random() * 180 + 120;
+        }
+      }
+
+      animId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <ElegantShape
-        delay={0.3}
-        width={600}
-        height={140}
-        rotate={12}
-        gradient="from-indigo-500/[0.15]"
-        className="left-[-10%] md:left-[-5%] top-[15%] md:top-[20%]"
-      />
-      <ElegantShape
-        delay={0.5}
-        width={500}
-        height={120}
-        rotate={-15}
-        gradient="from-violet-500/[0.15]"
-        className="right-[-5%] md:right-[0%] top-[60%] md:top-[65%]"
-      />
-      <ElegantShape
-        delay={0.4}
-        width={300}
-        height={80}
-        rotate={-8}
-        gradient="from-violet-500/[0.15]"
-        className="left-[5%] md:left-[10%] bottom-[5%] md:bottom-[10%]"
-      />
-      <ElegantShape
-        delay={0.6}
-        width={200}
-        height={60}
-        rotate={20}
-        gradient="from-cyan-500/[0.15]"
-        className="right-[15%] md:right-[20%] top-[10%] md:top-[15%]"
-      />
-      <ElegantShape
-        delay={0.7}
-        width={150}
-        height={40}
-        rotate={-25}
-        gradient="from-indigo-500/[0.15]"
-        className="left-[20%] md:left-[25%] top-[5%] md:top-[10%]"
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "fixed",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+        zIndex: 0,
+      }}
+    />
   );
 }
