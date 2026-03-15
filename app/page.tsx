@@ -1,7 +1,6 @@
 import WaitlistForm from "./WaitlistForm";
 import ThemeToggle from "@/components/ThemeToggle";
 import { FloatingShapes } from "@/components/ui/shape-landing-hero";
-import { BackgroundBeams } from "@/components/ui/background-beams";
 
 const subjects = [
   { icon: "calculate",   name: "Mathematics",     color: "#3B82F6", bg: "#0d0d2b" },
@@ -33,9 +32,6 @@ export default function WaitlistPage() {
 
       {/* ANIMATED FLOATING SHAPES BACKGROUND */}
       <FloatingShapes />
-
-      {/* BACKGROUND BEAMS */}
-      <BackgroundBeams className="z-0 opacity-60" />
 
       {/* NAV */}
       <nav style={{ position: "relative", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 32px", borderBottom: "1px solid var(--border-color)", backgroundColor: "var(--nav-bg)", backdropFilter: "blur(12px)" }}>
