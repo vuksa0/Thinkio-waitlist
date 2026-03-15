@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Theme variables ── */
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text: #111111;
+  --text-muted: #64748B;
+  --text-subtle: #999aaa;
+  --border-color: rgba(0,0,0,0.06);
+  --nav-bg: rgba(255,255,255,0.85);
+  --stats-bg: #f8fafc;
+  --badge-bg: #F1F5F9;
+  --badge-border: rgba(137,90,246,0.25);
+  --badge-text: #111111;
+}
+
+.dark {
+  --bg: #08080f;
+  --bg-secondary: rgba(255,255,255,0.03);
+  --text: #ffffff;
+  --text-muted: rgba(255,255,255,0.55);
+  --text-subtle: rgba(255,255,255,0.3);
+  --border-color: rgba(255,255,255,0.08);
+  --nav-bg: rgba(8,8,15,0.85);
+  --stats-bg: rgba(255,255,255,0.03);
+  --badge-bg: rgba(255,255,255,0.08);
+  --badge-border: rgba(137,90,246,0.35);
+  --badge-text: #ffffff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ── MotionButton — light mode: black pill ── */
+.motion-btn {
+  position: relative;
+  height: 56px;
+  width: 240px;
+  cursor: pointer;
+  border-radius: 999px;
+  border: none;
+  background: #111111;
+  padding: 4px;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.motion-btn-circle {
+  display: block;
+  height: 48px;
+  width: 48px;
+  border-radius: 999px;
+  background: #ffffff;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.motion-btn:hover .motion-btn-circle {
+  width: 100%;
+}
+
+.motion-btn-arrow {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #111111;
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+.motion-btn:hover .motion-btn-arrow {
+  transform: translateY(-50%) translateX(4px);
+}
+
+.motion-btn-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-30%, -50%);
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  transition: color 0.3s ease;
+  pointer-events: none;
+}
+
+.motion-btn:hover .motion-btn-label {
+  color: #111111;
+}
+
+/* ── MotionButton — dark mode: white pill ── */
+.dark .motion-btn {
+  background: #ffffff;
+}
+
+.dark .motion-btn-circle {
+  background: #111111;
+}
+
+.dark .motion-btn-arrow {
+  color: #ffffff;
+}
+
+.dark .motion-btn-label {
+  color: #111111;
+}
+
+.dark .motion-btn:hover .motion-btn-label {
+  color: #ffffff;
+}
+
+/* ── Subject cards hover ── */
+.subject-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.subject-card:hover {
+  transform: translateY(-3px);
+}
+
+/* ── Badge ── */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  background: var(--badge-bg);
+  padding: 6px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--badge-text);
+  border: 1px solid var(--badge-border);
+}
+
+/* ── How it works dark section ── */
+.how-section {
+  background: #0d0d14;
+  padding: 80px 24px;
+}
+
+/* ── Step number circles ── */
+.step-num {
+  background: #ffffff;
+  color: #111111;
+}
+
+.light .step-num {
+  background: #111111;
+  color: #ffffff;
+}
+
+/* ── Input focus ── */
+.waitlist-input:focus {
+  outline: none;
+  border-color: #895af6;
+  box-shadow: 0 0 0 3px rgba(137,90,246,0.12);
+}
+
+/* ── Stats bar ── */
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 32px;
+}
+.stat-item + .stat-item {
+  border-left: 1px solid var(--border-color);
+}
+
+@media (max-width: 600px) {
+  .stats-row {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .stat-item + .stat-item {
+    border-left: none;
+  }
+  .motion-btn {
+    width: 100%;
+    max-width: 320px;
+  }
+}
