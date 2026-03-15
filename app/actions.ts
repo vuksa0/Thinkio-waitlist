@@ -30,7 +30,7 @@ export async function joinWaitlist(formData: FormData) {
     await Promise.all([
       // Welcome email to the user
       resend.emails.send({
-        from: "Thinkio <hello@thinkio.app>",
+        from: "Thinkio <onboarding@resend.dev>",
         to: email,
         subject: "You're on the Thinkio waitlist!",
         html: `
@@ -48,7 +48,7 @@ export async function joinWaitlist(formData: FormData) {
       }),
       // Notification to you
       resend.emails.send({
-        from: "Thinkio <hello@thinkio.app>",
+        from: "Thinkio <onboarding@resend.dev>",
         to: "vukasindragutinovic8@gmail.com",
         subject: `New waitlist signup: ${email}`,
         html: `<p style="font-family:sans-serif;color:#111"><strong>${email}</strong> just joined the Thinkio waitlist.</p>`,
